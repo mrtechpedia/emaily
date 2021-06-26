@@ -23,18 +23,17 @@ passport.use(
       callbackURL: "/auth/google/callback",
       proxy: true,
     },
-    (accessToken, refreshToken, profile, done) => {
-      User.findOne({ googleId: profile.id }).then((existingUser) => {
-        if (existingUser) {
-          done(null, existingUser);
-        } else {
-          new User({
-            googleId: profile.id,
-          })
-            .save()
-            .then((user) => done(null, user));
-        }
-      });
+    async (accessToken, refreshToken, profile, done) => {
+      const existingUser = await User.findOne({ googleId: profile.id });
+
+      if (existingUser) {
+        return done(null, existingUser);
+      }
+      //we added a return statement and removed that shitty else because agr user mil gaya to return ho jega aur us return k neeche ka code chlega hi nhi......so we can avoid that else part
+      const user = await new User({
+        googleId: profile.id,
+      }).save();
+      done(null, user);
     }
   )
 );
